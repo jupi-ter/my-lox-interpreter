@@ -27,6 +27,6 @@ static const ErrorMessageMap error_messages[] = {
 
 void error(const char* message);
 void error_at_line(int line, const char* message);
-void error_at_token(Token* token, const char* message);
+void error_at_token(Token token, const char* message);
 
 #endif
