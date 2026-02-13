@@ -1,0 +1,6 @@
+./*.o
+*.o
+/*.o
+.o
+whisker.exe
+*.exe

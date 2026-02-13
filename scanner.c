@@ -6,7 +6,7 @@
 #include <string.h>
 
 static bool is_at_end(Scanner* scanner) {
-    return scanner->source[scanner->current] != '\0';
+    return scanner->source[scanner->current] == '\0';
 }
 
 static void add_token_literal(Scanner* scanner, TokenType type, Literal literal) {

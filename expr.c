@@ -18,7 +18,7 @@ Expr* expr_unary(Token oprt, Expr* right) {
     Expr* expr = malloc(sizeof(Expr));
     if (!expr) error(error_messages[ERROR_MALLOCFAIL].message);
 
-    expr->type = EXPR_LITERAL;
+    expr->type = EXPR_UNARY;
     expr->as.unary.oprt = oprt;
     expr->as.unary.right = right;
 
