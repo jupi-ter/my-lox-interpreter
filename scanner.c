@@ -81,7 +81,7 @@ static TokenType get_keyword(const char* text) {
         }
     }
 
-    return TOKEN_IDENTIFIER; //not found
+    return TOKEN_IDENTIFIER; //not a keyword
 }
 
 static void identifier(Scanner* scanner) {
