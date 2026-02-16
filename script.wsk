@@ -3,10 +3,12 @@ entity Player {
     float vsp;
     
     on_create {
-        self.hsp = 2.5;
+        self.hsp = 0;
         self.vsp = 0;
-        transform.x = 100;
-        transform.y = 50;
-        renderable.image_speed = 0.2;
+    }
+    
+    on_update {
+        self.hsp = 2;
+        transform.x = transform.x + self.hsp;
     }
 }

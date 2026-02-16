@@ -349,7 +349,10 @@ static EntityDecl* entity_declaration(Parser* parser) {
     EntityField* fields = malloc(sizeof(EntityField) * field_capacity);
     if (!fields) error(error_messages[ERROR_MALLOCFAIL].message);
     
-    while (!check(parser, TOKEN_RIGHT_BRACE) && !check(parser, TOKEN_ON_CREATE) && !is_at_end(parser)) {
+    while (!check(parser, TOKEN_RIGHT_BRACE) &&
+            !check(parser, TOKEN_ON_CREATE) &&
+            !check(parser, TOKEN_ON_UPDATE) &&
+            !is_at_end(parser)) {
         if (field_count >= field_capacity) {
             field_capacity *= 2;
             EntityField* new_fields = realloc(fields, sizeof(EntityField) * field_capacity);
@@ -367,16 +370,23 @@ static EntityDecl* entity_declaration(Parser* parser) {
         fields[field_count++] = (EntityField){ .name = field_name, .type = type };
     }
     
-     // Parse on_create block
+    // Parse on_create block
     Stmt* on_create = NULL;
     if (match(parser, TOKEN_ON_CREATE)) {
         consume(parser, TOKEN_LEFT_BRACE, "Expect '{' after on_create.");
         on_create = block_statement(parser);  // Reuse block parsing!
     }
     
+    // Parse on_update block
+    Stmt* on_update = NULL;
+    if (match(parser, TOKEN_ON_UPDATE)) {
+        consume(parser, TOKEN_LEFT_BRACE, "Expect '{' after on_update.");
+        on_update = block_statement(parser);
+    }
+
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after entity body.");
     
-    return entity_decl_create(name, fields, field_count, on_create);
+    return entity_decl_create(name, fields, field_count, on_create, on_update);
 }
 
 Program parse(Parser* parser) {

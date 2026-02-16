@@ -104,6 +104,8 @@ char* token_type_to_string(TokenType type) {
             return "renderable";
         case TOKEN_COLLISION:
             return "collision";
+        case TOKEN_ON_UPDATE:
+            return "on_update";
     }
     return "";
 }

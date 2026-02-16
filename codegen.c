@@ -363,6 +363,58 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
     append(gen, "}\n\n");
 }
 
+// Generate entity update function
+static void generate_entity_update(CodeGen* gen, EntityDecl* entity) {
+    if (!entity->on_update) return;  // Skip if no on_update
+    
+    char lower_name[256];
+    snprintf(lower_name, sizeof(lower_name), "%s", entity->name.lexeme);
+    for (int i = 0; lower_name[i]; i++) {
+        if (lower_name[i] >= 'A' && lower_name[i] <= 'Z') {
+            lower_name[i] = lower_name[i] + 32;
+        }
+    }
+    
+    appendf(gen, "void %s_update(GameState* game, uint32_t entity_id) {\n", lower_name);
+    gen->indent_level++;
+    
+    // Find the entity by entity_id
+    append_indent(gen);
+    appendf(gen, "%s* entity = NULL;\n", entity->name.lexeme);
+    append_indent(gen);
+    appendf(gen, "for (int i = 0; i < game->%ss.count; i++) {\n", lower_name);
+    gen->indent_level++;
+    append_indent(gen);
+    appendf(gen, "if (game->%ss.data[i].entity_id == entity_id) {\n", lower_name);
+    gen->indent_level++;
+    append_indent(gen);
+    appendf(gen, "entity = &game->%ss.data[i];\n", lower_name);
+    append_indent(gen);
+    append(gen, "break;\n");
+    gen->indent_level--;
+    append_indent(gen);
+    append(gen, "}\n");
+    gen->indent_level--;
+    append_indent(gen);
+    append(gen, "}\n");
+    append_indent(gen);
+    append(gen, "if (!entity) return;\n");
+    append(gen, "\n");
+    
+    // Make eid available for component access
+    append_indent(gen);
+    append(gen, "uint32_t eid = entity_id;\n");
+    append(gen, "\n");
+    
+    // Generate on_update code
+    append_indent(gen);
+    append(gen, "// on_update\n");
+    generate_stmt(gen, entity->on_update, entity->name.lexeme);
+    
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
 void codegen_generate_program(CodeGen* gen, Program* program) {
     // Header includes
     append(gen, "#include <stdint.h>\n");
@@ -386,5 +438,6 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
     // Generate entity lifecycle functions
     for (int i = 0; i < program->entity_count; i++) {
         generate_entity_create(gen, program->entities[i]);
+        generate_entity_update(gen, program->entities[i]);
     }
 }
