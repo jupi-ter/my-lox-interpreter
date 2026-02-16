@@ -20,13 +20,13 @@ int run(char* source) {
     printf("\n");
 
     Parser parser = parser_create(tokens);
-    Expr* ast = parse(&parser);
+    StmtList program = parse(&parser);
 
     printf("=== AST ===\n");
-    print_ast(ast);
+    print_program(program.statements, program.count);
     printf("\n");
 
-    expr_free(ast);
+    free_stmt_list(&program);
     free_token_list(&tokens);
 
     return 0;

@@ -2,6 +2,7 @@
 #include "literal.h"
 #include "token.h"
 #include <stdio.h>
+#include "stmt.h"
 
 static void print_expr_recursive(Expr* expr, int indent) {
  if (!expr) return;
@@ -45,4 +46,44 @@ static void print_expr_recursive(Expr* expr, int indent) {
 
 void print_ast(Expr* expr) {
     print_expr_recursive(expr, 0);
+}
+
+static void print_expr_recursive(Expr* expr, int indent);
+
+static void print_stmt_recursive(Stmt* stmt, int indent) {
+    if (!stmt) return;
+    
+    for (int i = 0; i < indent; i++) printf("  ");
+    
+    switch (stmt->type) {
+        case STMT_EXPRESSION:
+            printf("ExprStmt\n");
+            print_expr_recursive(stmt->as.expr.expr, indent + 1);
+            break;
+            
+        case STMT_PRINT:
+            printf("PrintStmt\n");
+            print_expr_recursive(stmt->as.print.expr, indent + 1);
+            break;
+            
+        case STMT_VAR:
+            printf("VarDecl (%s)\n", stmt->as.var.name.lexeme);
+            if (stmt->as.var.initializer) {
+                print_expr_recursive(stmt->as.var.initializer, indent + 1);
+            }
+            break;
+            
+        case STMT_BLOCK:
+            printf("Block\n");
+            for (int i = 0; i < stmt->as.block.count; i++) {
+                print_stmt_recursive(stmt->as.block.statements[i], indent + 1);
+            }
+            break;
+    }
+}
+
+void print_program(Stmt** statements, int count) {
+    for (int i = 0; i < count; i++) {
+        print_stmt_recursive(statements[i], 0);
+    }
 }

@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include "expr.h"
+#include "stmt.h"
 
 typedef struct {
     Token* tokens;
@@ -10,7 +11,13 @@ typedef struct {
     int count;
 } Parser;
 
+typedef struct {
+    Stmt** statements;
+    int count;
+} StmtList;
+
 Parser parser_create(TokenList tokens);
-Expr* parse(Parser* parser);
+StmtList parse(Parser* parser);
+void free_stmt_list(StmtList* list);
 
 #endif

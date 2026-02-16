@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "error.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 Parser parser_create(TokenList tokens) {
     Parser parser = {
@@ -220,6 +221,103 @@ static Expr* expression(Parser* parser) {
     return assignment(parser);
 }
 
-Expr* parse(Parser* parser) {
-    return expression(parser);
+// ========= Statement Grammar ==========
+static Stmt* statement(Parser* parser);
+static Stmt* print_statement(Parser* parser);
+static Stmt* expression_statement(Parser* parser);
+static Stmt* var_declaration(Parser* parser);
+static Stmt* block_statement(Parser* parser);
+
+static Stmt* block_statement(Parser* parser) {
+    int capacity = 8;
+    int count = 0;
+    Stmt** statements = malloc(sizeof(Stmt*) * capacity);
+    if (!statements) error(error_messages[ERROR_MALLOCFAIL].message);
+    
+    while (!check(parser, TOKEN_RIGHT_BRACE) && !is_at_end(parser)) {
+        if (count >= capacity) {
+            capacity *= 2;
+            Stmt** new_stmts = realloc(statements, sizeof(Stmt*) * capacity);
+            if (!new_stmts) {
+                // Cleanup on failure
+                for (int i = 0; i < count; i++) stmt_free(statements[i]);
+                free(statements);
+                error(error_messages[ERROR_REALLOCFAIL].message);
+            }
+            statements = new_stmts;
+        }
+        
+        statements[count++] = statement(parser);
+    }
+    
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+    return stmt_block(statements, count);
+}
+
+static Stmt* var_declaration(Parser* parser) {
+    Token name = consume(parser, TOKEN_IDENTIFIER, "Expect variable name.");
+    
+    Expr* initializer = NULL;
+    if (match(parser, TOKEN_EQUAL)) {
+        initializer = expression(parser);
+    }
+    
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+    return stmt_var(name, initializer);
+}
+
+static Stmt* print_statement(Parser* parser) {
+    Expr* value = expression(parser);
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after value.");
+    return stmt_print(value);
+}
+
+static Stmt* expression_statement(Parser* parser) {
+    Expr* expr = expression(parser);
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after expression.");
+    return stmt_expression(expr);
+}
+
+static Stmt* statement(Parser* parser) {
+    if (match(parser, TOKEN_PRINT)) return print_statement(parser);
+    if (match(parser, TOKEN_LEFT_BRACE)) return block_statement(parser);
+    
+    return expression_statement(parser);
+}
+
+static Stmt* declaration(Parser* parser) {
+    if (match(parser, TOKEN_VAR)) return var_declaration(parser);
+    return statement(parser);
+}
+
+StmtList parse(Parser* parser) {
+    int capacity = 8;
+    int count = 0;
+    Stmt** statements = malloc(sizeof(Stmt*) * capacity);
+    if (!statements) error(error_messages[ERROR_MALLOCFAIL].message);
+    
+    while (!is_at_end(parser)) {
+        if (count >= capacity) {
+            capacity *= 2;
+            Stmt** new_stmts = realloc(statements, sizeof(Stmt*) * capacity);
+            if (!new_stmts) {
+                for (int i = 0; i < count; i++) stmt_free(statements[i]);
+                free(statements);
+                error(error_messages[ERROR_REALLOCFAIL].message);
+            }
+            statements = new_stmts;
+        }
+        
+        statements[count++] = declaration(parser);
+    }
+    
+    StmtList result = { .statements = statements, .count = count };
+    return result;
+}
+
+void free_stmt_list(StmtList* list) {
+    for (int i = 0; i < list->count; i++) {
+        stmt_free(list->statements[i]);
+    }
+    free(list->statements);
 }
