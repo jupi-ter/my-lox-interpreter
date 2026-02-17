@@ -38,7 +38,9 @@ int run(char* source) {
     printf("=== GENERATED C CODE ===\n");
     CodeGen codegen = codegen_create();
     codegen_generate_program(&codegen, &program);
-    printf("%s\n", codegen_get_output(&codegen));
+    printf("%s\n", codegen.header_output);
+    printf("%s\n", codegen.source_output);
+    codegen_write_files(&codegen, "../RatGameC/src/game_generated.h", "../RatGameC/src/game_generated.c");
     codegen_free(&codegen);
 
     free_program(&program);

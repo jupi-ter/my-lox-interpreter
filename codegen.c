@@ -13,42 +13,69 @@ static void generate_stmt(CodeGen* gen, Stmt* stmt, const char* entity_name);
 
 CodeGen codegen_create(void) {
     CodeGen gen = {0};
-    gen.capacity = INITIAL_CAPACITY;
-    gen.length = 0;
+    gen.header_capacity = INITIAL_CAPACITY;
+    gen.header_output = malloc(gen.header_capacity);
+    gen.header_output[0] = '\0';
+    
+    gen.source_capacity = INITIAL_CAPACITY;
+    gen.source_output = malloc(gen.source_capacity);
+    gen.source_output[0] = '\0';
+    
     gen.indent_level = 0;
-    gen.output = malloc(gen.capacity);
-    if (!gen.output) error(error_messages[ERROR_MALLOCFAIL].message);
-    gen.output[0] = '\0';
     return gen;
 }
 
 void codegen_free(CodeGen* gen) {
-    free(gen->output);
-    gen->output = NULL;
-    gen->capacity = 0;
-    gen->length = 0;
+    free(gen->header_output);
+    free(gen->source_output);
+    gen->header_output = NULL;
+    gen->source_output = NULL;
 }
 
-char* codegen_get_output(CodeGen* gen) {
-    return gen->output;
+//char* codegen_get_output(CodeGen* gen) {
+//    return gen->output;
+//}
+
+static void append_h(CodeGen* gen, const char* str) {
+    int len = strlen(str);
+    while (gen->header_length + len + 1 >= gen->header_capacity) {
+        gen->header_capacity *= 2;
+        char* new_output = realloc(gen->header_output, gen->header_capacity);
+        if (!new_output) error(error_messages[ERROR_REALLOCFAIL].message);
+        gen->header_output = new_output;
+    }
+    strcpy(gen->header_output + gen->header_length, str);
+    gen->header_length += len;
 }
 
-// Helper to append string
+static void append_indent_h(CodeGen* gen) {
+    for (int i = 0; i < gen->indent_level; i++) {
+        append_h(gen, "    ");
+    }
+}
+
+static void appendf_h(CodeGen* gen, const char* fmt, ...) {
+    char buffer[1024];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+    append_h(gen, buffer);
+}
+
+// Append to source
 static void append(CodeGen* gen, const char* str) {
     int len = strlen(str);
-    
-    while (gen->length + len + 1 >= gen->capacity) {
-        gen->capacity *= 2;
-        char* new_output = realloc(gen->output, gen->capacity);
+    while (gen->source_length + len + 1 >= gen->source_capacity) {
+        gen->source_capacity *= 2;
+        char* new_output = realloc(gen->source_output, gen->source_capacity);
         if (!new_output) error(error_messages[ERROR_REALLOCFAIL].message);
-        gen->output = new_output;
+        gen->source_output = new_output;
     }
-    
-    strcpy(gen->output + gen->length, str);
-    gen->length += len;
+    strcpy(gen->source_output + gen->source_length, str);
+    gen->source_length += len;
 }
 
-// Helper to append formatted string
 static void appendf(CodeGen* gen, const char* fmt, ...) {
     char buffer[1024];
     va_list args;
@@ -77,74 +104,77 @@ static const char* field_type_to_c(FieldType type) {
 }
 
 // Generate entity struct
-static void generate_entity_struct(CodeGen* gen, EntityDecl* entity) {
-    appendf(gen, "typedef struct %s {\n", entity->name.lexeme);
+static void generate_entity_struct_h(CodeGen* gen, EntityDecl* entity) {
+    appendf_h(gen, "typedef struct %s {\n", entity->name.lexeme);
     gen->indent_level++;
-    
+
     append_indent(gen);
-    append(gen, "uint32_t entity_id;\n");
-    
+    append_h(gen, "uint32_t entity_id;\n");
+
     for (int i = 0; i < entity->field_count; i++) {
         append_indent(gen);
-        appendf(gen, "%s %s;\n", 
+        appendf_h(gen, "%s %s;\n",
                 field_type_to_c(entity->fields[i].type),
                 entity->fields[i].name.lexeme);
     }
-    
+
     gen->indent_level--;
-    appendf(gen, "} %s;\n\n", entity->name.lexeme);
+    appendf_h(gen, "} %s;\n\n", entity->name.lexeme);
 }
 
 // Generate entity array
-static void generate_entity_array(CodeGen* gen, EntityDecl* entity) {
-    appendf(gen, "typedef struct %sArray {\n", entity->name.lexeme);
+static void generate_entity_array_h(CodeGen* gen, EntityDecl* entity) {
+    appendf_h(gen, "typedef struct %sArray {\n", entity->name.lexeme);
     gen->indent_level++;
-    
+
     append_indent(gen);
-    appendf(gen, "%s* data;\n", entity->name.lexeme);
+    appendf_h(gen, "%s* data;\n", entity->name.lexeme);
     append_indent(gen);
-    append(gen, "int count;\n");
+    append_h(gen, "int count;\n");
     append_indent(gen);
-    append(gen, "int capacity;\n");
-    
+    append_h(gen, "int capacity;\n");
+
     gen->indent_level--;
-    appendf(gen, "} %sArray;\n\n", entity->name.lexeme);
+    appendf_h(gen, "} %sArray;\n\n", entity->name.lexeme);
 }
 
 // Generate GameState
-static void generate_game_state(CodeGen* gen, Program* program) {
-    append(gen, "typedef struct GameState {\n");
+static void generate_game_state_h(CodeGen* gen, Program* program) {
+    append_h(gen, "typedef struct GameState {\n");
     gen->indent_level++;
-    
+
     // Engine components
     append_indent(gen);
-    append(gen, "// Engine components\n");
+    append_h(gen, "// Engine components\n");
     append_indent(gen);
-    append(gen, "EntityRegistry registry;\n");
+    append_h(gen, "EntityRegistry registry;\n");
     append_indent(gen);
-    append(gen, "TransformArray transforms;\n");
+    append_h(gen, "TransformArray transforms;\n");
     append_indent(gen);
-    append(gen, "RenderableArray renderables;\n");
+    append_h(gen, "RenderableArray renderables;\n");
     append_indent(gen);
-    append(gen, "CircleArray circles;\n");
+    append_h(gen, "CircleArray circles;\n");
     append_indent(gen);
-    append(gen, "RectangleArray rectangles;\n");
+    append_h(gen, "RectangleArray rectangles;\n");
     append_indent(gen);
-    append(gen, "TimerArray timers;\n");
-    append(gen, "\n");
-    
+    append_h(gen, "TimerArray timers;\n");
+    append_h(gen, "\n");
+
     // Entity arrays
     append_indent(gen);
-    append(gen, "// Game entity arrays\n");
+    // Game entity arrays
     for (int i = 0; i < program->entity_count; i++) {
-        append_indent(gen);
-        appendf(gen, "%sArray %ss;\n", 
-                program->entities[i]->name.lexeme,
-                program->entities[i]->name.lexeme);  // lowercase would be better
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+        append_indent_h(gen);
+        appendf_h(gen, "%sArray %ss;\n", program->entities[i]->name.lexeme, lower_name);
     }
-    
+
     gen->indent_level--;
-    append(gen, "} GameState;\n\n");
+    append_h(gen, "} GameState;\n\n");
 }
 
 // Generate expression as C code
@@ -565,29 +595,64 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
 }
 
 void codegen_generate_program(CodeGen* gen, Program* program) {
-    // Header includes
-    append(gen, "#include <stdint.h>\n");
-    append(gen, "#include <stdbool.h>\n");
-    append(gen, "#include <stdlib.h>\n");
-    append(gen, "#include \"entity.h\"\n");
-    append(gen, "#include \"transform.h\"\n");
-    append(gen, "#include \"renderable.h\"\n");
-    append(gen, "#include \"collision.h\"\n");
-    append(gen, "#include \"timer.h\"\n\n");
+    // ===== HEADER =====
+    append_h(gen, "#ifndef GAME_GENERATED_H\n");
+    append_h(gen, "#define GAME_GENERATED_H\n\n");
+    append_h(gen, "#include <stdint.h>\n");
+    append_h(gen, "#include <stdbool.h>\n");
+    append_h(gen, "#include <stdlib.h>\n");
+    append_h(gen, "#include \"forward.h\"\n\n"); //forward declarations, i don't know if these are required.
+    append_h(gen, "#include \"entity.h\"\n");
+    append_h(gen, "#include \"transform.h\"\n");
+    append_h(gen, "#include \"renderable.h\"\n");
+    append_h(gen, "#include \"collision.h\"\n");
+    append_h(gen, "#include \"timer.h\"\n\n");
+    append_h(gen, "#include \"sprite.h\"\n\n");
     
-    // Generate entity structs
+    // Entity structs and arrays go in header
     for (int i = 0; i < program->entity_count; i++) {
-        generate_entity_struct(gen, program->entities[i]);
-        generate_entity_array(gen, program->entities[i]);
+        generate_entity_struct_h(gen, program->entities[i]);
+        generate_entity_array_h(gen, program->entities[i]);
     }
     
-    // Generate GameState
-    generate_game_state(gen, program);
+    // GameState goes in header
+    generate_game_state_h(gen, program);
     
-    // Generate entity lifecycle functions
+    // Function declarations go in header
+    for (int i = 0; i < program->entity_count; i++) {
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+        appendf_h(gen, "uint32_t %s_create(GameState* game, float x, float y);\n", lower_name);
+        appendf_h(gen, "void %s_update(GameState* game, uint32_t entity_id);\n", lower_name);
+        appendf_h(gen, "void %s_destroy(GameState* game, uint32_t entity_id);\n", lower_name);
+    }
+    
+    append_h(gen, "\n#endif // GAME_GENERATED_H\n");
+    
+    // ===== SOURCE =====
+    append(gen, "#include \"game_generated.h\"\n\n");
+    
+    // Function implementations go in source
     for (int i = 0; i < program->entity_count; i++) {
         generate_entity_create(gen, program->entities[i]);
         generate_entity_update(gen, program->entities[i]);
         generate_entity_destroy(gen, program->entities[i], program);
     }
+}
+
+void codegen_write_files(CodeGen* gen, const char* header_path, const char* source_path) {
+    FILE* f = fopen(header_path, "w");
+    if (!f) error(error_messages[ERROR_FILELOAD].message);
+    fprintf(f, "%s", gen->header_output);
+    fclose(f);
+    printf("Wrote: %s\n", header_path);
+    
+    f = fopen(source_path, "w");
+    if (!f) error(error_messages[ERROR_FILELOAD].message);
+    fprintf(f, "%s", gen->source_output);
+    fclose(f);
+    printf("Wrote: %s\n", source_path);
 }

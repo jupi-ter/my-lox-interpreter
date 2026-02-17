@@ -5,32 +5,17 @@ entity Player {
     on_create {
         self.hsp = 0;
         self.vsp = 0;
+        renderable.current_sprite_id = 2;
+        renderable.image_speed = 0.1;
+        transform.x = 64;
+        transform.y = 64;
     }
     
     on_update {
-        self.hsp = 2;
         transform.x = transform.x + self.hsp;
     }
     
     on_destroy {
         self.hsp = 0;
-    }
-}
-
-entity Enemy {
-    float speed;
-    int health;
-    
-    on_create {
-        self.speed = 1;
-        self.health = 3;
-    }
-    
-    on_update {
-        transform.x = transform.x + self.speed;
-    }
-    
-    on_destroy {
-        self.health = 0;
     }
 }
