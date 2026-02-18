@@ -2,11 +2,11 @@
 #include "error.h"
 #include <stdlib.h>
 
-EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count, 
+EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count,
                                 Stmt* on_create, Stmt* on_update, Stmt* on_destroy) {
     EntityDecl* entity = malloc(sizeof(EntityDecl));
     if (!entity) error(error_messages[ERROR_MALLOCFAIL].message);
-    
+
     entity->name = name;
     entity->fields = fields;
     entity->field_count = field_count;
@@ -19,11 +19,13 @@ EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count,
 
 void entity_decl_free(EntityDecl* entity) {
     if (!entity) return;
+    free(entity->name.lexeme);  // <-- add this
+    for (int i = 0; i < entity->field_count; i++) {
+        free(entity->fields[i].name.lexeme);  // <-- and these
+    }
     free(entity->fields);
-    
     stmt_free(entity->on_create);
     stmt_free(entity->on_update);
     stmt_free(entity->on_destroy);
-
     free(entity);
 }

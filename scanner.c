@@ -204,7 +204,7 @@ TokenList scan_tokens(Scanner* scanner) {
 
     Token token = {
       .type = TOKEN_EOF,
-      .lexeme = "",
+      .lexeme = my_strndup("", 0),
       .line = scanner->line
     };
     add_token_list(&scanner->tokens, token);

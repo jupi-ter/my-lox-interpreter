@@ -457,7 +457,7 @@ static EntityDecl* entity_declaration(Parser* parser) {
         Token field_name = consume(parser, TOKEN_IDENTIFIER, "Expect field name.");
         consume(parser, TOKEN_SEMICOLON, "Expect ';' after field declaration.");
         
-        fields[field_count++] = (EntityField){ .name = field_name, .type = type };
+        fields[field_count++] = (EntityField){ .name = token_copy(field_name), .type = type };
     }
     
     // parse lifecycle blocks
@@ -483,7 +483,7 @@ static EntityDecl* entity_declaration(Parser* parser) {
 
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after entity body.");
     
-    return entity_decl_create(name, fields, field_count, on_create, on_update, on_destroy);
+    return entity_decl_create(token_copy(name), fields, field_count, on_create, on_update, on_destroy);
 }
 
 Program parse(Parser* parser) {

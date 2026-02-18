@@ -3,6 +3,8 @@
 #include "literal.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "utils.h"
+#include <string.h>
 
 char* token_type_to_string(TokenType type) {
     switch(type) {
@@ -110,6 +112,15 @@ char* token_type_to_string(TokenType type) {
             return "on_destroy";
     }
     return "";
+}
+
+Token token_copy(Token t) {
+    t.lexeme = my_strndup(t.lexeme, strlen(t.lexeme));
+    // strings in literals also need copying
+    if (t.literal.type == LITERAL_STRING) {
+        t.literal.as.string = my_strndup(t.literal.as.string, strlen(t.literal.as.string));
+    }
+    return t;
 }
 
 char* token_to_string(Token token) {

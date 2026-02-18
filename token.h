@@ -84,6 +84,7 @@ static const KeywordMap keywords[] = {
 
 //helpers
 char* token_to_string(Token token);
+Token token_copy(Token t);
 char* token_type_to_string(TokenType type);
 
 //list managers
