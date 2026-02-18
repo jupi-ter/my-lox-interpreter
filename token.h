@@ -78,6 +78,8 @@ static const KeywordMap keywords[] = {
     {"bool", TOKEN_BOOL},
     {"uint32", TOKEN_UINT32},
     {"transform", TOKEN_TRANSFORM},
+    {"renderable", TOKEN_RENDERABLE},
+    {"collision", TOKEN_COLLISION},
     {"game", TOKEN_GAME},
     {"spawn", TOKEN_SPAWN}
 };
