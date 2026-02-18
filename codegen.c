@@ -16,11 +16,11 @@ CodeGen codegen_create(void) {
     gen.header_capacity = INITIAL_CAPACITY;
     gen.header_output = malloc(gen.header_capacity);
     gen.header_output[0] = '\0';
-    
+
     gen.source_capacity = INITIAL_CAPACITY;
     gen.source_output = malloc(gen.source_capacity);
     gen.source_output[0] = '\0';
-    
+
     gen.indent_level = 0;
     return gen;
 }
@@ -189,10 +189,10 @@ static void generate_expr(CodeGen* gen, Expr* expr, const char* entity_name) {
                 append(gen, expr->as.literal.value.as.boolean ? "true" : "false");
             }
             break;
-            
+
         case EXPR_VARIABLE: {
             const char* varname = expr->as.variable.name.lexeme;
-            
+
             if (strcmp(varname, "self") == 0) {
                 append(gen, "entity");
             } else if (strcmp(varname, "transform") == 0) {
@@ -206,31 +206,31 @@ static void generate_expr(CodeGen* gen, Expr* expr, const char* entity_name) {
             }
             break;
         }
-            
+
         case EXPR_BINARY:
             generate_expr(gen, expr->as.binary.left, entity_name);
             appendf(gen, " %s ", expr->as.binary.oprt.lexeme);
             generate_expr(gen, expr->as.binary.right, entity_name);
             break;
-            
+
         case EXPR_UNARY:
             append(gen, expr->as.unary.oprt.lexeme);
             generate_expr(gen, expr->as.unary.right, entity_name);
             break;
-            
+
         case EXPR_GROUPING:
             append(gen, "(");
             generate_expr(gen, expr->as.grouping.expression, entity_name);
             append(gen, ")");
             break;
-            
+
         case EXPR_ASSIGN:
             // Check if assigning to self.field
             appendf(gen, "%s", expr->as.assign.name.lexeme);
             append(gen, " = ");
             generate_expr(gen, expr->as.assign.value, entity_name);
             break;
-        
+
         case EXPR_GET:
             generate_expr(gen, expr->as.get.object, entity_name);
             appendf(gen, "->%s", expr->as.get.name.lexeme);
@@ -256,7 +256,7 @@ static void generate_stmt(CodeGen* gen, Stmt* stmt, const char* entity_name) {
             generate_expr(gen, stmt->as.expr.expr, entity_name);
             append(gen, ";\n");
             break;
-            
+
         case STMT_VAR:
             append_indent(gen);
             // For now, assume all vars are float - we'll improve this later
@@ -268,17 +268,17 @@ static void generate_stmt(CodeGen* gen, Stmt* stmt, const char* entity_name) {
             }
             append(gen, ";\n");
             break;
-            
+
         case STMT_BLOCK:
             for (int i = 0; i < stmt->as.block.count; i++) {
                 generate_stmt(gen, stmt->as.block.statements[i], entity_name);
             }
             break;
-            
+
         case STMT_PRINT:
             // Skip print statements in generated code (or implement debug logging)
             break;
-        
+
         case STMT_IF:
             append_indent(gen);
             append(gen, "if (");
@@ -329,22 +329,22 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
             lower_name[i] = lower_name[i] + 32;  // to lowercase
         }
     }
-    
+
     appendf(gen, "uint32_t %s_create(GameState* game, float x, float y) {\n", lower_name);
     gen->indent_level++;
-    
+
     // Create entity in engine
     append_indent(gen);
     append(gen, "uint32_t entity_id = entity_create(&game->registry, &game->transforms,\n");
     append_indent(gen);
     append(gen, "                                   &game->renderables, &game->circles, &game->rectangles);\n");
     append(gen, "\n");
-    
+
     // Set default collision (we'll make this configurable later)
     append_indent(gen);
     append(gen, "entity_set_collision(&game->registry, entity_id, COLLISION_NONE);\n");
     append(gen, "\n");
-    
+
     // Initialize engine components with defaults
     append_indent(gen);
     append(gen, "game->transforms.data[entity_id] = (transform_t){\n");
@@ -359,7 +359,7 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
     append_indent(gen);
     append(gen, "};\n");
     append(gen, "\n");
-    
+
     append_indent(gen);
     append(gen, "game->renderables.data[entity_id] = (Renderable){\n");
     gen->indent_level++;
@@ -375,23 +375,23 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
     append_indent(gen);
     append(gen, "};\n");
     append(gen, "\n");
-    
+
     // Add to game-specific array (with realloc if needed)
     appendf(gen, "    if (game->%ss.count >= game->%ss.capacity) {\n", lower_name, lower_name);
-    appendf(gen, "        game->%ss.capacity = game->%ss.capacity == 0 ? 8 : game->%ss.capacity * 2;\n", 
+    appendf(gen, "        game->%ss.capacity = game->%ss.capacity == 0 ? 8 : game->%ss.capacity * 2;\n",
             lower_name, lower_name, lower_name);
     appendf(gen, "        game->%ss.data = realloc(game->%ss.data, sizeof(%s) * game->%ss.capacity);\n",
             lower_name, lower_name, entity->name.lexeme, lower_name);
     append(gen, "    }\n");
     append(gen, "\n");
-    
+
     // Initialize entity struct
-    appendf(gen, "    game->%ss.data[game->%ss.count++] = (%s){\n", 
+    appendf(gen, "    game->%ss.data[game->%ss.count++] = (%s){\n",
             lower_name, lower_name, entity->name.lexeme);
     gen->indent_level++;
     append_indent(gen);
     append(gen, ".entity_id = entity_id");
-    
+
     // Initialize custom fields to zero
     for (int i = 0; i < entity->field_count; i++) {
         append(gen, ",\n");
@@ -399,12 +399,12 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
         appendf(gen, ".%s = 0", entity->fields[i].name.lexeme);
     }
     append(gen, "\n");
-    
+
     gen->indent_level--;
     append_indent(gen);
     append(gen, "};\n");
     append(gen, "\n");
-    
+
     // Generate on_create code
     if (entity->on_create) {
         append_indent(gen);
@@ -414,14 +414,14 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
                 entity->name.lexeme, lower_name, lower_name);
         append_indent(gen);
         append(gen, "uint32_t eid = entity->entity_id;  // For component access\n");
-        
+
         // Generate statements with eid available
         generate_stmt(gen, entity->on_create, entity->name.lexeme);
     }
-    
+
     append_indent(gen);
     append(gen, "return entity_id;\n");
-    
+
     gen->indent_level--;
     append(gen, "}\n\n");
 }
@@ -429,7 +429,7 @@ static void generate_entity_create(CodeGen* gen, EntityDecl* entity) {
 // Generate entity update function
 static void generate_entity_update(CodeGen* gen, EntityDecl* entity) {
     if (!entity->on_update) return;  // Skip if no on_update
-    
+
     char lower_name[256];
     snprintf(lower_name, sizeof(lower_name), "%s", entity->name.lexeme);
     for (int i = 0; lower_name[i]; i++) {
@@ -437,10 +437,10 @@ static void generate_entity_update(CodeGen* gen, EntityDecl* entity) {
             lower_name[i] = lower_name[i] + 32;
         }
     }
-    
+
     appendf(gen, "void %s_update(GameState* game, uint32_t entity_id) {\n", lower_name);
     gen->indent_level++;
-    
+
     // Find the entity by entity_id
     append_indent(gen);
     appendf(gen, "%s* entity = NULL;\n", entity->name.lexeme);
@@ -463,17 +463,17 @@ static void generate_entity_update(CodeGen* gen, EntityDecl* entity) {
     append_indent(gen);
     append(gen, "if (!entity) return;\n");
     append(gen, "\n");
-    
+
     // Make eid available for component access
     append_indent(gen);
     append(gen, "uint32_t eid = entity_id;\n");
     append(gen, "\n");
-    
+
     // Generate on_update code
     append_indent(gen);
     append(gen, "// on_update\n");
     generate_stmt(gen, entity->on_update, entity->name.lexeme);
-    
+
     gen->indent_level--;
     append(gen, "}\n\n");
 }
@@ -486,10 +486,10 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
             lower_name[i] = lower_name[i] + 32;
         }
     }
-    
+
     appendf(gen, "void %s_destroy(GameState* game, uint32_t entity_id) {\n", lower_name);
     gen->indent_level++;
-    
+
     // Run on_destroy user code first
     if (entity->on_destroy) {
         append_indent(gen);
@@ -510,7 +510,7 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
         gen->indent_level--;
         append_indent(gen);
         append(gen, "}\n");
-        
+
         append_indent(gen);
         append(gen, "if (!entity) return;\n");
         append_indent(gen);
@@ -520,7 +520,7 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
         generate_stmt(gen, entity->on_destroy, entity->name.lexeme);
         append(gen, "\n");
     }
-    
+
     // Call engine destroy (swap-and-pop)
     append_indent(gen);
     append(gen, "int moved_id = entity_destroy(&game->registry, entity_id,\n");
@@ -529,7 +529,7 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
     append_indent(gen);
     append(gen, "    &game->circles, &game->rectangles);\n");
     append(gen, "\n");
-    
+
     // Remove from this entity's array
     append_indent(gen);
     appendf(gen, "for (int i = 0; i < game->%ss.count; i++) {\n", lower_name);
@@ -551,14 +551,14 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
     append_indent(gen);
     append(gen, "}\n");
     append(gen, "\n");
-    
+
     // Update moved entity references in ALL entity arrays
     append_indent(gen);
     append(gen, "// Fix moved entity references (swap-and-pop)\n");
     append_indent(gen);
     append(gen, "if (moved_id != -1) {\n");
     gen->indent_level++;
-    
+
     for (int i = 0; i < program->entity_count; i++) {
         char other_lower[256];
         snprintf(other_lower, sizeof(other_lower), "%s", program->entities[i]->name.lexeme);
@@ -567,7 +567,7 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
                 other_lower[j] = other_lower[j] + 32;
             }
         }
-        
+
         append_indent(gen);
         appendf(gen, "for (int i = 0; i < game->%ss.count; i++) {\n", other_lower);
         gen->indent_level++;
@@ -589,7 +589,83 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
     gen->indent_level--;
     append_indent(gen);
     append(gen, "}\n");
-    
+
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
+static void generate_game_init(CodeGen* gen, Program* program) {
+    append(gen, "void game_init(GameState* game) {\n");
+    gen->indent_level++;
+
+    // Initialize all entity arrays
+    for (int i = 0; i < program->entity_count; i++) {
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+
+        append_indent(gen);
+        appendf(gen, "game->%ss.data = malloc(sizeof(%s) * 8);\n",
+                lower_name, program->entities[i]->name.lexeme);
+        append_indent(gen);
+        appendf(gen, "game->%ss.capacity = 8;\n", lower_name);
+        append_indent(gen);
+        appendf(gen, "game->%ss.count = 0;\n", lower_name);
+        append(gen, "\n");
+    }
+
+    append_indent(gen);
+    append(gen, "// TODO: Initial entity spawns go here\n");
+
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
+static void generate_game_update(CodeGen* gen, Program* program) {
+    append(gen, "void game_update(GameState* game) {\n");
+    gen->indent_level++;
+
+    // Update all entity types
+    for (int i = 0; i < program->entity_count; i++) {
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+
+        append_indent(gen);
+        appendf(gen, "for (int i = 0; i < game->%ss.count; i++) {\n", lower_name);
+        gen->indent_level++;
+        append_indent(gen);
+        appendf(gen, "%s_update(game, game->%ss.data[i].entity_id);\n",
+                lower_name, lower_name);
+        gen->indent_level--;
+        append_indent(gen);
+        append(gen, "}\n");
+    }
+
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
+static void generate_game_cleanup(CodeGen* gen, Program* program) {
+    append(gen, "void game_cleanup(GameState* game) {\n");
+    gen->indent_level++;
+
+    // Free all entity arrays
+    for (int i = 0; i < program->entity_count; i++) {
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+
+        append_indent(gen);
+        appendf(gen, "free(game->%ss.data);\n", lower_name);
+    }
+
     gen->indent_level--;
     append(gen, "}\n\n");
 }
@@ -608,16 +684,16 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
     append_h(gen, "#include \"collision.h\"\n");
     append_h(gen, "#include \"timer.h\"\n\n");
     append_h(gen, "#include \"sprite.h\"\n\n");
-    
+
     // Entity structs and arrays go in header
     for (int i = 0; i < program->entity_count; i++) {
         generate_entity_struct_h(gen, program->entities[i]);
         generate_entity_array_h(gen, program->entities[i]);
     }
-    
+
     // GameState goes in header
     generate_game_state_h(gen, program);
-    
+
     // Function declarations go in header
     for (int i = 0; i < program->entity_count; i++) {
         char lower_name[256];
@@ -629,18 +705,23 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
         appendf_h(gen, "void %s_update(GameState* game, uint32_t entity_id);\n", lower_name);
         appendf_h(gen, "void %s_destroy(GameState* game, uint32_t entity_id);\n", lower_name);
     }
-    
+
     append_h(gen, "\n#endif // GAME_GENERATED_H\n");
-    
+
     // ===== SOURCE =====
     append(gen, "#include \"game_generated.h\"\n\n");
-    
+
     // Function implementations go in source
     for (int i = 0; i < program->entity_count; i++) {
         generate_entity_create(gen, program->entities[i]);
         generate_entity_update(gen, program->entities[i]);
         generate_entity_destroy(gen, program->entities[i], program);
     }
+
+    // Generate game lifecycle functions
+    generate_game_init(gen, program);
+    generate_game_update(gen, program);
+    generate_game_cleanup(gen, program);
 }
 
 void codegen_write_files(CodeGen* gen, const char* header_path, const char* source_path) {
@@ -649,7 +730,7 @@ void codegen_write_files(CodeGen* gen, const char* header_path, const char* sour
     fprintf(f, "%s", gen->header_output);
     fclose(f);
     printf("Wrote: %s\n", header_path);
-    
+
     f = fopen(source_path, "w");
     if (!f) error(error_messages[ERROR_FILELOAD].message);
     fprintf(f, "%s", gen->source_output);
