@@ -5,7 +5,7 @@ entity Player {
     on_create {
         self.hsp = 0;
         self.vsp = 0;
-        renderable.current_sprite_id = 2;
+        renderable.current_sprite_id = 2;  // SPRITE_PLAYER
         renderable.image_speed = 0.1;
     }
     
@@ -27,6 +27,37 @@ entity Player {
     }
 }
 
+entity Enemy {
+    float hsp;
+    int direction;
+    
+    on_create {
+        self.hsp = 1;
+        self.direction = 1;
+        renderable.current_sprite_id = 1;  // SPRITE_ENEMY (or whatever sprite you have)
+        renderable.image_speed = 0.1;
+    }
+    
+    on_update {
+        transform.x = transform.x + (self.hsp * self.direction);
+        
+        // Bounce at screen edges
+        if (transform.x > 120) {
+            self.direction = -1;
+        }
+        if (transform.x < 8) {
+            self.direction = 1;
+        }
+    }
+    
+    on_destroy {
+        self.hsp = 0;
+    }
+}
+
 game {
     spawn Player(64, 64);
+    spawn Enemy(100, 50);
+    spawn Enemy(80, 80);
+    spawn Enemy(40, 100);
 }
