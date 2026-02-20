@@ -110,6 +110,8 @@ char* token_type_to_string(TokenType type) {
             return "on_update";
         case TOKEN_ON_DESTROY:
             return "on_destroy";
+        case TOKEN_ON_COLLISION:
+            return "on_collision";
         case TOKEN_GAME:
             return "game";
         case TOKEN_SPAWN:

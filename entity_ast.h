@@ -23,6 +23,8 @@ typedef struct {
     Stmt* on_create;         // on_create block - nullable.
     Stmt* on_update;
     Stmt* on_destroy;
+    Stmt* on_collision;
+    Token collision_param; // other member in collision
 } EntityDecl;
 
 typedef struct {
@@ -30,7 +32,7 @@ typedef struct {
     int count;
 } EntityList;
 
-EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count, Stmt* on_create, Stmt* on_update, Stmt* on_destroy);
+EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count, Stmt* on_create, Stmt* on_update, Stmt* on_destroy, Stmt* on_collision, Token collision_param);
 void entity_decl_free(EntityDecl* entity);
 
 #endif

@@ -204,8 +204,9 @@ static void generate_expr(CodeGen* gen, Expr* expr, const char* entity_name) {
             } else if (strcmp(varname, "renderable") == 0) {
                 append(gen, "(&game->renderables.data[eid])");
             } else if (strcmp(varname, "collision") == 0) {
-                append(gen, "/* collision - needs runtime type check */");
-            } else {
+                // Need runtime type check since collision is union
+                append(gen, "/* TODO: collision access needs type checking */");
+            }else {
                 append(gen, varname);
             }
             break;
@@ -610,6 +611,53 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
     append(gen, "}\n\n");
 }
 
+static void generate_entity_collision(CodeGen* gen, EntityDecl* entity) {
+    if (!entity->on_collision) return;
+
+    char lower_name[256];
+    snprintf(lower_name, sizeof(lower_name), "%s", entity->name.lexeme);
+    for (int i = 0; lower_name[i]; i++) {
+        if (lower_name[i] >= 'A' && lower_name[i] <= 'Z') lower_name[i] += 32;
+    }
+
+    appendf(gen, "void %s_on_collision(GameState* game, uint32_t entity_id, uint32_t other_id) {\n", lower_name);
+    gen->indent_level++;
+
+    // Find entity
+    append_indent(gen);
+    appendf(gen, "%s* entity = NULL;\n", entity->name.lexeme);
+    append_indent(gen);
+    appendf(gen, "for (int i = 0; i < game->%ss.count; i++) {\n", lower_name);
+    gen->indent_level++;
+    append_indent(gen);
+    appendf(gen, "if (game->%ss.data[i].entity_id == entity_id) {\n", lower_name);
+    gen->indent_level++;
+    append_indent(gen);
+    appendf(gen, "entity = &game->%ss.data[i];\n", lower_name);
+    append_indent(gen);
+    append(gen, "break;\n");
+    gen->indent_level--;
+    append_indent(gen);
+    append(gen, "}\n");
+    gen->indent_level--;
+    append_indent(gen);
+    append(gen, "}\n");
+    append_indent(gen);
+    append(gen, "if (!entity) return;\n\n");
+
+    append_indent(gen);
+    append(gen, "uint32_t eid = entity_id;\n");
+    append_indent(gen);
+    appendf(gen, "uint32_t %s = other_id;\n", entity->collision_param.lexeme);
+    append(gen, "\n");
+
+    // Generate collision code
+    generate_stmt(gen, entity->on_collision, entity->name.lexeme);
+
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
 static void generate_game_init(CodeGen* gen, Program* program) {
     append(gen, "void game_init(GameState* game) {\n");
     gen->indent_level++;
@@ -750,6 +798,7 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
         generate_entity_create(gen, program->entities[i]);
         generate_entity_update(gen, program->entities[i]);
         generate_entity_destroy(gen, program->entities[i], program);
+        generate_entity_collision(gen, program->entities[i]);
     }
 
     // Generate game lifecycle functions

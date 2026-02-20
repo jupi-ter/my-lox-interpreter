@@ -1,27 +1,31 @@
 entity Player {
     float hsp;
     float vsp;
-    
+
     on_create {
         self.hsp = 0;
         self.vsp = 0;
-        renderable.current_sprite_id = 2;  // SPRITE_PLAYER
+        renderable.current_sprite_id = 2;
         renderable.image_speed = 0.1;
     }
-    
+
     on_update {
         self.hsp = 0;
-        
+
         if (keyboard_check(KEY_RIGHT)) {
             self.hsp = 2;
         }
         if (keyboard_check(KEY_LEFT)) {
             self.hsp = -2;
         }
-        
+
         transform.x = transform.x + self.hsp;
     }
-    
+
+    on_collision(other) {
+        self.hsp = 0;
+    }
+
     on_destroy {
         self.hsp = 0;
     }
@@ -30,18 +34,17 @@ entity Player {
 entity Enemy {
     float hsp;
     int direction;
-    
+
     on_create {
         self.hsp = 1;
         self.direction = 1;
-        renderable.current_sprite_id = 1;  // SPRITE_ENEMY (or whatever sprite you have)
+        renderable.current_sprite_id = 1;
         renderable.image_speed = 0.1;
     }
-    
+
     on_update {
         transform.x = transform.x + (self.hsp * self.direction);
-        
-        // Bounce at screen edges
+
         if (transform.x > 120) {
             self.direction = -1;
         }
@@ -49,7 +52,11 @@ entity Enemy {
             self.direction = 1;
         }
     }
-    
+
+    on_collision(other) {
+        self.direction = self.direction * -1;
+    }
+
     on_destroy {
         self.hsp = 0;
     }

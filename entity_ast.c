@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count,
-                                Stmt* on_create, Stmt* on_update, Stmt* on_destroy) {
+                                Stmt* on_create, Stmt* on_update, Stmt* on_destroy, Stmt* on_collision, Token collision_param) {
     EntityDecl* entity = malloc(sizeof(EntityDecl));
     if (!entity) error(error_messages[ERROR_MALLOCFAIL].message);
 
@@ -13,6 +13,8 @@ EntityDecl* entity_decl_create(Token name, EntityField* fields, int field_count,
     entity->on_create = on_create;
     entity->on_update = on_update;
     entity->on_destroy = on_destroy;
+    entity->on_collision = on_collision;
+    entity->collision_param = collision_param;
 
     return entity;
 }

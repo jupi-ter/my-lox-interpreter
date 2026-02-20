@@ -22,7 +22,7 @@ typedef enum {
     TOKEN_PRINT, TOKEN_RETURN, TOKEN_SUPER, TOKEN_THIS, TOKEN_TRUE, TOKEN_VAR, TOKEN_WHILE, TOKEN_GAME, TOKEN_SPAWN,
 
     // Entity keywords.
-    TOKEN_ENTITY, TOKEN_ON_CREATE, TOKEN_ON_UPDATE, TOKEN_ON_DESTROY, TOKEN_SELF, TOKEN_FLOAT, TOKEN_INT,
+    TOKEN_ENTITY, TOKEN_ON_CREATE, TOKEN_ON_UPDATE, TOKEN_ON_DESTROY, TOKEN_ON_COLLISION, TOKEN_SELF, TOKEN_FLOAT, TOKEN_INT,
     TOKEN_BOOL, TOKEN_UINT32,
 
     // Engine component keywords.
@@ -49,7 +49,7 @@ typedef struct {
     TokenType type;
 } KeywordMap;
 
-#define KEYWORD_COUNT 30
+#define KEYWORD_COUNT 31
 
 static const KeywordMap keywords[] = {
     {"and" , TOKEN_AND},
@@ -72,6 +72,7 @@ static const KeywordMap keywords[] = {
     {"on_create", TOKEN_ON_CREATE},
     {"on_update", TOKEN_ON_UPDATE},
     {"on_destroy", TOKEN_ON_DESTROY},
+    {"on_collision", TOKEN_ON_COLLISION},
     {"self", TOKEN_SELF},
     {"float", TOKEN_FLOAT},
     {"int", TOKEN_INT},
