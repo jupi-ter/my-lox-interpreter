@@ -250,7 +250,21 @@ static void generate_expr(CodeGen* gen, Expr* expr, const char* entity_name) {
             break;
 
         case EXPR_CALL: {
-            // Generate: function_name(arg1, arg2, ...)
+            // Special case: place_meeting needs game and eid injected
+            if (expr->as.call.callee->type == EXPR_VARIABLE &&
+                strcmp(expr->as.call.callee->as.variable.name.lexeme, "place_meeting") == 0) {
+
+                append(gen, "place_meeting(game, eid, ");
+                // Generate the user's arguments (x, y, type)
+                for (int i = 0; i < expr->as.call.argc; i++) {
+                    if (i > 0) append(gen, ", ");
+                    generate_expr(gen, expr->as.call.argv[i], entity_name);
+                }
+                append(gen, ")");
+                break;
+            }
+
+        // Normal function call
             generate_expr(gen, expr->as.call.callee, entity_name);
             append(gen, "(");
             for (int i = 0; i < expr->as.call.argc; i++) {
@@ -934,6 +948,9 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
         appendf_h(gen, "void %s_update(GameState* game, uint32_t entity_id);\n", lower_name);
         appendf_h(gen, "void %s_destroy(GameState* game, uint32_t entity_id);\n", lower_name);
     }
+
+    append_h(gen, "\n// Collision helper\n");
+    append_h(gen, "bool place_meeting(GameState* game, uint32_t entity_id, float x, float y, EntityType type);\n\n");
 
     append_h(gen,"void game_init(GameState* game);");
     append_h(gen,"void game_update(GameState* game);");

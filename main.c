@@ -29,7 +29,7 @@ int run(char* source) {
     printf("\n=== ENTITIES ===\n");
     printf("Found %d entities\n", program.entity_count);
     for (int i = 0; i < program.entity_count; i++) {
-        printf("Entity: %s (%d fields)\n", 
+        printf("Entity: %s (%d fields)\n",
             program.entities[i]->name.lexeme,
             program.entities[i]->field_count);
     }
@@ -43,8 +43,8 @@ int run(char* source) {
     codegen_write_files(&codegen, "../RatGameC/src/game_generated.h", "../RatGameC/src/game_generated.c");
     codegen_free(&codegen);
 
-    free_program(&program);
     free_token_list(&tokens);
+    free_program(&program);
 
     return 0;
 }

@@ -24,13 +24,39 @@ entity Player {
         if (keyboard_check(KEY_DOWN)) self.vsp = 2;
         if (keyboard_check(KEY_UP)) self.vsp = -2;
 
+        // Horizontal movement with collision
         transform.x = transform.x + self.hsp;
+        if (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+            if (self.hsp > 0) {
+                while (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+                    transform.x = transform.x - 1;
+                }
+            } else {
+                while (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+                    transform.x = transform.x + 1;
+                }
+            }
+            self.hsp = 0;
+        }
+
+        // Vertical movement with collision
         transform.y = transform.y + self.vsp;
+        if (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+            if (self.vsp > 0) {
+                while (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+                    transform.y = transform.y - 1;
+                }
+            } else {
+                while (place_meeting(transform.x, transform.y, ENTITY_TYPE_WALL)) {
+                    transform.y = transform.y + 1;
+                }
+            }
+            self.vsp = 0;
+        }
     }
 
     on_collision(other) {
-        transform.x = transform.x - self.hsp;
-        transform.y = transform.y - self.vsp;
+
     }
 }
 
