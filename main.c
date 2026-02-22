@@ -1,8 +1,8 @@
-
 // https://craftinginterpreters.com/scanning.html
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "scanner.h"
 #include "parser.h"
 #include "token.h"
@@ -10,6 +10,8 @@
 #include "entity_ast.h"
 #include "printer.h"
 #include "codegen.h"
+
+static char* output_dir = NULL;
 
 int run(char* source) {
     Scanner scanner = scanner_create(source);
@@ -40,7 +42,14 @@ int run(char* source) {
     codegen_generate_program(&codegen, &program);
     printf("%s\n", codegen.header_output);
     printf("%s\n", codegen.source_output);
-    codegen_write_files(&codegen, "../RatGameC/src/game_generated.h", "../RatGameC/src/game_generated.c");
+
+    // Build output paths
+    char header_path[512];
+    char source_path[512];
+    snprintf(header_path, sizeof(header_path), "%s/game_generated.h", output_dir);
+    snprintf(source_path, sizeof(source_path), "%s/game_generated.c", output_dir);
+
+    codegen_write_files(&codegen, header_path, source_path);
     codegen_free(&codegen);
 
     free_token_list(&tokens);
@@ -83,13 +92,16 @@ int run_file(char* script) {
 }
 
 int main(int argc, char** argv) {
-    if (argc > 2) {
-        error(error_messages[ERROR_ARGC].message);
-    } else if (argc == 2) {
-        run_file(argv[1]);
-    } else {
-        error(error_messages[ERROR_USAGE].message);
+    if (argc < 2 || argc > 3) {
+        fprintf(stderr, "Usage: whisker <file.wsk> [output_dir]\n");
+        fprintf(stderr, "  output_dir defaults to ../RatGameC/src/\n");
+        return 1;
     }
+
+    // Set output directory
+    output_dir = (argc == 3) ? argv[2] : "../RatGameC/src";
+
+    run_file(argv[1]);
 
     printf("Exited with no errors.");
     return 0;
