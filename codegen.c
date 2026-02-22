@@ -264,7 +264,20 @@ static void generate_expr(CodeGen* gen, Expr* expr, const char* entity_name) {
                 break;
             }
 
-        // Normal function call
+            if (expr->as.call.callee->type == EXPR_VARIABLE &&
+                strcmp(expr->as.call.callee->as.variable.name.lexeme, "instance_destroy") == 0) {
+
+                append(gen, "instance_destroy(game, ");
+                // User provides just the entity_id
+                for (int i = 0; i < expr->as.call.argc; i++) {
+                    if (i > 0) append(gen, ", ");
+                    generate_expr(gen, expr->as.call.argv[i], entity_name);
+                }
+                append(gen, ")");
+                break;
+            }
+
+            // Normal function call
             generate_expr(gen, expr->as.call.callee, entity_name);
             append(gen, "(");
             for (int i = 0; i < expr->as.call.argc; i++) {
@@ -712,6 +725,54 @@ static void generate_entity_destroy(CodeGen* gen, EntityDecl* entity, Program* p
     append(gen, "}\n\n");
 }
 
+//dispatcher
+static void generate_instance_destroy(CodeGen* gen, Program* program) {
+    append(gen, "void instance_destroy(GameState* game, uint32_t entity_id) {\n");
+    gen->indent_level++;
+
+    append_indent(gen);
+    append(gen, "printf(\"instance_destroy called on entity %d\\n\", entity_id);\n");
+
+    append_indent(gen);
+    append(gen, "switch (game->entity_types[entity_id]) {\n");
+
+    for (int i = 0; i < program->entity_count; i++) {
+        char upper_name[256];
+        snprintf(upper_name, sizeof(upper_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; upper_name[j]; j++) {
+            if (upper_name[j] >= 'a' && upper_name[j] <= 'z') upper_name[j] -= 32;
+        }
+
+        char lower_name[256];
+        snprintf(lower_name, sizeof(lower_name), "%s", program->entities[i]->name.lexeme);
+        for (int j = 0; lower_name[j]; j++) {
+            if (lower_name[j] >= 'A' && lower_name[j] <= 'Z') lower_name[j] += 32;
+        }
+
+        append_indent(gen);
+        appendf(gen, "case ENTITY_TYPE_%s:\n", upper_name);
+        gen->indent_level++;
+        append_indent(gen);
+        appendf(gen, "%s_destroy(game, entity_id);\n", lower_name);
+        append_indent(gen);
+        append(gen, "break;\n");
+        gen->indent_level--;
+    }
+
+    append_indent(gen);
+    append(gen, "default:\n");
+    gen->indent_level++;
+    append_indent(gen);
+    append(gen, "break;\n");
+    gen->indent_level--;
+
+    append_indent(gen);
+    append(gen, "}\n");
+
+    gen->indent_level--;
+    append(gen, "}\n\n");
+}
+
 static void generate_entity_collision(CodeGen* gen, EntityDecl* entity) {
     if (!entity->on_collision) return;
 
@@ -952,6 +1013,8 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
     append_h(gen, "\n// Collision helper\n");
     append_h(gen, "bool place_meeting(GameState* game, uint32_t entity_id, float x, float y, EntityType type);\n\n");
 
+    append_h(gen, "void instance_destroy(GameState* game, uint32_t entity_id);\n");
+
     append_h(gen,"void game_init(GameState* game);");
     append_h(gen,"void game_update(GameState* game);");
     append_h(gen,"void game_cleanup(GameState* game);");
@@ -975,6 +1038,7 @@ void codegen_generate_program(CodeGen* gen, Program* program) {
     generate_game_update(gen, program);
     generate_game_cleanup(gen, program);
     generate_collision_dispatcher(gen, program);
+    generate_instance_destroy(gen, program);
 }
 
 void codegen_write_files(CodeGen* gen, const char* header_path, const char* source_path) {

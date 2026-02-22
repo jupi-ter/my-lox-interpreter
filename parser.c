@@ -497,7 +497,7 @@ static EntityDecl* entity_declaration(Parser* parser) {
 
     // in any order
     while (!check(parser, TOKEN_RIGHT_BRACE)) {
-        if (match(parser, TOKEN_INIT)) {                                    // ADD THIS BLOCK
+        if (match(parser, TOKEN_INIT)) {
             consume(parser, TOKEN_LEFT_BRACE, "Expect '{' after init.");
             init = block_statement(parser);
         } else if (match(parser, TOKEN_ON_CREATE)) {
