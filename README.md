@@ -277,6 +277,7 @@ These files are automatically placed in `../RatGameC/src/` relative to the trans
 
 - Memory cleanup has a double-free bug on exit (files generate correctly, cleanup crashes)
 - Entity type names use naive pluralization (Enemy becomes "enemys")
+- Typed declarations not actually implemented (all become `float` regardless of declared type)
 
 ## Roadmap
 
