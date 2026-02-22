@@ -1,21 +1,204 @@
-MIT License
+WHISKER TRANSPILER AND LANGUAGE LICENSE
+Version 1.0
 
-Copyright (c) 2026 jules
+Copyright (c)  jules
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. DEFINITIONS
+
+   "License" means this document.
+
+   "Licensor" means the copyright holder(s) named above.
+
+   "You" (or "Your") means an individual or legal entity exercising permissions
+   granted by this License.
+
+   "Software" means the source code, object code, compiled binaries, associated
+   documentation, and all other files distributed under this License, including
+   the transpiler, compiler, language specification, standard library, toolchain,
+   and any related tooling.
+
+   "Derivative Work" means any work that is based on or derived from the
+   Software, including but not limited to modifications, translations,
+   adaptations, forks, ports, and works that incorporate or link against the
+   Software.
+
+   "Commercial Purpose" means any use, reproduction, distribution, or
+   modification of the Software or a Derivative Work that is intended for or
+   results in commercial advantage or monetary compensation, directly or
+   indirectly. This includes but is not limited to: selling or licensing the
+   Software or Derivative Work; using the Software or Derivative Work to provide
+   paid services; bundling the Software or Derivative Work with a commercial
+   product; and using the Software or Derivative Work in a commercial production
+   environment.
+
+   "AI Training Purpose" means using the Software, its source code, its output,
+   or any Derivative Work as training data, fine-tuning data, evaluation data,
+   reinforcement learning data, or any other input to a machine learning or
+   artificial intelligence system, model, or pipeline, regardless of whether
+   such system is commercial or non-commercial.
+
+   "Distribute" means to make the Software or a Derivative Work available to
+   any third party by any means, including but not limited to publication,
+   transmission, upload, or physical delivery.
+
+
+2. GRANT OF LICENSE
+
+   Subject to the terms and conditions of this License, the Licensor hereby
+   grants You a worldwide, royalty-free, non-exclusive, non-sublicensable
+   license to:
+
+   a) Use the Software for any Non-Commercial Purpose;
+
+   b) Copy and Distribute the Software in source or compiled form, provided
+      that You comply with Section 3 (Conditions of Distribution);
+
+   c) Modify the Software and create Derivative Works, provided that You comply
+      with Section 3 (Conditions of Distribution) and Section 4 (Copyleft
+      Requirement);
+
+   d) Merge, publish, and sublicense the Software under the same terms of this
+      License.
+
+
+3. CONDITIONS OF DISTRIBUTION
+
+   You may Distribute the Software or any Derivative Work only if ALL of the
+   following conditions are met:
+
+   a) ATTRIBUTION: You must retain, in all copies and substantial portions of
+      the Software, the original copyright notice, this License in its entirety,
+      and a list of all modifications you have made (if any).
+
+   b) SAME LICENSE: Any Derivative Work you Distribute must be licensed under
+      this License, verbatim, with no additional restrictions. You may not
+      impose any terms that restrict rights granted by this License.
+
+   c) SOURCE AVAILABILITY: If you Distribute a compiled or binary form of the
+      Software or a Derivative Work, you must also make the complete
+      corresponding source code available under this License, either bundled
+      with the distribution or via a publicly accessible URL that remains
+      accessible for no less than three (3) years from the date of distribution.
+
+   d) NOTICE OF CHANGES: If you Distribute a Derivative Work, you must include
+      a prominent notice stating that you have modified the Software and the
+      date of such modifications.
+
+
+4. COPYLEFT REQUIREMENT
+
+   Any Derivative Work that you create or Distribute must be licensed under
+   this License in its entirety. You may not apply any license to a Derivative
+   Work that is more permissive or more restrictive than this License. In
+   particular, you may not relicense a Derivative Work under the MIT License,
+   Apache License, GPL, or any other license.
+
+
+5. RESTRICTIONS
+
+   The following uses are expressly prohibited:
+
+   a) COMMERCIAL USE PROHIBITED: You may not use the Software, or any
+      Derivative Work, for any Commercial Purpose without prior written
+      permission from the Licensor. This prohibition applies to the Software
+      itself and its toolchain. It does not apply to programs or outputs
+      produced by the Software's compiler or transpiler (i.e., code you write
+      in this language and compile is your own and is not subject to this
+      restriction).
+
+   b) AI TRAINING PROHIBITED: You may not use the Software, its source code,
+      its documentation, or any Derivative Work for any AI Training Purpose.
+      This prohibition applies regardless of whether the use is commercial or
+      non-commercial. Tools, pipelines, or automated systems that scrape,
+      collect, or process the Software for AI Training Purposes are explicitly
+      not authorized.
+
+   c) SUBLICENSING UNDER DIFFERENT TERMS: You may not sublicense the Software
+      or any Derivative Work under any license other than this License.
+
+
+6. OUTPUTS OF THE SOFTWARE
+
+   Code, programs, or other artifacts that You produce using the Software
+   (i.e., programs written in this language and transpiled or compiled by the
+   Software) are Your own work and are not subject to the terms of this
+   License. You retain full ownership and may license such outputs under any
+   terms you choose, including commercial licenses.
+
+
+7. CONTRIBUTIONS
+
+   If You submit contributions (pull requests, patches, suggestions, or other
+   modifications) to the Licensor for inclusion in the Software, You grant the
+   Licensor a perpetual, irrevocable, worldwide, royalty-free license to use,
+   reproduce, modify, and distribute your contribution under this License or
+   any future version of this License chosen by the Licensor.
+
+
+8. TERMINATION
+
+   Your rights under this License terminate automatically if You breach any of
+   its terms. Upon termination, You must cease all use, distribution, and
+   modification of the Software and destroy all copies in Your possession.
+
+   The Licensor may, at their discretion, reinstate Your rights upon written
+   notice if the breach is cured within thirty (30) days of the Licensor
+   notifying You of the breach.
+
+
+9. DISCLAIMER OF WARRANTIES
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE LICENSOR
+   DOES NOT WARRANT THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS, OPERATE
+   WITHOUT INTERRUPTION, OR BE FREE OF ERRORS OR DEFECTS.
+
+   YOU ASSUME ALL RISK ASSOCIATED WITH THE USE OF THE SOFTWARE. THIS DISCLAIMER
+   OF WARRANTIES IS AN ESSENTIAL PART OF THIS LICENSE. NO USE OF THE SOFTWARE
+   IS AUTHORIZED EXCEPT UNDER THIS DISCLAIMER.
+
+
+10. LIMITATION OF LIABILITY
+
+    TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE
+    LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT LIMITED TO
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+    OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SOFTWARE, EVEN IF
+    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+11. MISCELLANEOUS
+
+    a) This License constitutes the entire agreement between You and the
+       Licensor with respect to the Software and supersedes all prior
+       agreements, representations, and understandings.
+
+    b) If any provision of this License is found to be unenforceable, such
+       provision shall be modified to the minimum extent necessary to make it
+       enforceable, and the remaining provisions shall continue in full force.
+
+    c) The failure of the Licensor to enforce any provision of this License
+       shall not be construed as a waiver of the Licensor's right to enforce
+       such provision in the future.
+
+    d) This License shall be governed by and construed in accordance with the
+       laws of the jurisdiction in which the Licensor is domiciled, without
+       regard to conflict of law principles.
+
+    e) Any commercial licensing inquiries may be directed to the Licensor.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+END OF LICENSE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
