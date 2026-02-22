@@ -16,7 +16,7 @@ Whisker is designed around entities with lifecycle hooks and component-based arc
 ### Building the Transpiler
 
 ```bash
-git clone https://github.com/yourusername/whisker
+git clone https://github.com/jupi-ter/whisker
 cd whisker
 make
 ```
