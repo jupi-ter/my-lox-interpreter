@@ -1,17 +1,16 @@
+
 entity Player {
     float hsp;
     float vsp;
 
     init {
-        collision.type = COLLISION_RECT;
-        collision.width = 8;
-        collision.height = 8;
+
     }
 
     on_create {
         self.hsp = 0;
         self.vsp = 0;
-        renderable.current_sprite_id = 2;
+        renderable.current_sprite_id = SPRITE_RED;
         renderable.image_speed = 0.1;
     }
 
@@ -24,34 +23,11 @@ entity Player {
         if (keyboard_check(KEY_DOWN)) self.vsp = 2;
         if (keyboard_check(KEY_UP)) self.vsp = -2;
 
-        // Horizontal movement with collision
         transform.x = transform.x + self.hsp;
-
         transform.y = transform.y + self.vsp;
-    }
-
-    on_collision(other) {
-        instance_destroy(other);
-    }
-}
-
-entity Wall {
-    init {
-        collision.type = COLLISION_RECT;
-        collision.width = 8;
-        collision.height = 8;
-    }
-
-    on_create {
-        renderable.current_sprite_id = 1;
     }
 }
 
 game {
     spawn Player(64, 64);
-
-    spawn Wall(32, 32);
-    spawn Wall(96, 32);
-    spawn Wall(32, 96);
-    spawn Wall(96, 96);
 }
